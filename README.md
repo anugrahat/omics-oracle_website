@@ -60,7 +60,7 @@ NCBI_API_KEY=your_ncbi_key_here  # Optional for higher PubMed rate limits
 - 📋 **Beautiful Summaries**: Clinical insights, target recommendations, publication-ready output
 - 🔬 **Advanced Analysis**: Confidence scoring, query type detection
 
-**✅ No API Keys? Still Works!**
+**✅ No API Keys? Still Works!** Limited
 - Without OpenAI: Falls back to regex parsing + curated disease mappings
 - Without NCBI: Uses Europe PMC for literature search
 - Full functionality maintained with graceful degradation!
