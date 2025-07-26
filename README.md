@@ -14,7 +14,6 @@
 - ⚡ **Async Performance**: Concurrent API calls with intelligent SQLite caching
 - 🏆 **Comprehensive Scoring**: Literature evidence + inhibitor potency + structural data (0-10 scale)
 - 🛡️ **Production Ready**: Rate limiting, fallback mechanisms, graceful error handling
-- 🔄 **Works Without API Keys**: Fallback systems ensure functionality
 - 📋 **Intelligent Summaries**: LLM-generated analysis with clinical insights
 
 ## 🚀 Quick Start
