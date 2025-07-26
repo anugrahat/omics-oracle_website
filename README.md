@@ -1,4 +1,4 @@
-# 🧬 Omics-Oracle — a Retrieval-Augmented GenAI agent that instantly surfaces druggable targets by mining PubMed, ChEMBL, and PDB in one shot.
+# Omics-Oracle — a Retrieval-Augmented GenAI agent that instantly surfaces druggable targets by mining PubMed, ChEMBL, and PDB in one shot.
 
 **AI-powered drug discovery platform** that integrates multiple biological databases with Large Language Model intelligence for natural language therapeutic target analysis.
 
