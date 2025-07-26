@@ -451,7 +451,7 @@ If you use Omics Oracle in your research, please cite:
 
 ---
 
-**Built with ❤️ for the drug discovery community**
+**Built for the drug discovery community**
 
 *Advancing precision medicine through intelligent target discovery*
 
