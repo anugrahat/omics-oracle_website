@@ -1,6 +1,7 @@
-# 🧬 Omics Oracle: Therapeutic Target Discovery Agent
+# 🧬 Omics-Oracle — a Retrieval-Augmented GenAI agent that instantly surfaces druggable targets by mining PubMed, ChEMBL, and PDB in one shot.
 
 **AI-powered drug discovery platform** that integrates multiple biological databases with Large Language Model intelligence for natural language therapeutic target analysis.
+
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.8+-brightgreen.svg)
