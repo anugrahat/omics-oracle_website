@@ -36,6 +36,7 @@ class PDBClient:
         try:
             response = await client.post(self.search_url, json_data=query, cache_ttl_hours=24)
             search_results = response.get("result_set", [])
+            total_count = response.get("total_count", len(search_results))
             
             if not search_results:
                 # Fallback: try a simpler text search approach
@@ -60,6 +61,10 @@ class PDBClient:
             
             # Sort by quality score (descending)
             quality_structures.sort(key=lambda x: x.get("quality_score", 0), reverse=True)
+            
+            # Add metadata about total count if we hit the limit
+            if len(quality_structures) > 0 and total_count > limit:
+                quality_structures[0]["_total_count"] = total_count
             
             return quality_structures
             

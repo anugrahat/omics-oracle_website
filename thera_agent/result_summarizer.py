@@ -59,14 +59,28 @@ class TherapeuticResultSummarizer:
         # Prepare structured data for LLM
         summary_data = self._prepare_data_for_llm(data)
         
+        # Extract query context
+        query_context = self._analyze_query_context(query, summary_data)
+        
         prompt = f"""
 You are a world-class pharmaceutical researcher and drug discovery expert writing for a professional audience.
 Analyze the therapeutic target discovery results and provide an intelligent clinical analysis.
 
 ORIGINAL QUERY: "{query}"
 
+QUERY CONTEXT:
+{query_context}
+
 ANALYSIS DATA:
 {json.dumps(summary_data, indent=2)}
+
+CRITICAL INSTRUCTION: Use your full intelligence to understand what the user is REALLY looking for based on their query.
+Don't just report data - understand the context and intent behind the query and tailor your entire analysis accordingly.
+For example:
+- If they ask for weak inhibitors, explain why weak inhibitors are valuable in that context
+- If they mention a specific use case, focus your analysis on that application
+- If they have unusual criteria, try to understand the scientific reasoning behind it
+- Always explain WHY the results matter for their specific query
 
 Provide a comprehensive clinical analysis in markdown format with these sections:
 
@@ -83,9 +97,11 @@ For each target, analyze:
 ## 💊 Lead Compound Assessment
 Analyze the most promising inhibitors focusing on:
 - **Potency analysis** (IC50 values and significance)
+- **Assay types** (binding vs functional assays from the IC50 table)
 - **Selectivity considerations** 
 - **Drug-like properties** and development potential
 - **Structure-activity relationships** where relevant
+- **Clinical phase** of compounds if available
 
 ## 🏥 Clinical Development Perspective
 Provide strategic insights on:
@@ -124,13 +140,26 @@ DO NOT create ASCII tables - use clear prose and bullet points instead.
     def _prepare_data_for_llm(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Prepare structured data for LLM analysis"""
         
+        # Check if this is multi-target or single-target analysis
+        if "targets" in data:
+            # Multi-target analysis
+            targets = data["targets"]
+            query_type = "multi_target"
+        elif "gene_symbol" in data:
+            # Single-target analysis - wrap in array
+            targets = [data]
+            query_type = "single_target"
+        else:
+            targets = []
+            query_type = "unknown"
+        
         summary_data = {
-            "query_type": data.get("query_type", "unknown"),
-            "total_targets": len(data.get("targets", [])),
+            "query_type": query_type,
+            "total_targets": len(targets),
             "targets": []
         }
         
-        for target in data.get("targets", []):
+        for target in targets:
             target_summary = {
                 "gene_symbol": target.get("gene_symbol", "Unknown"),
                 "target_score": target.get("target_score", 0),
@@ -138,7 +167,8 @@ DO NOT create ASCII tables - use clear prose and bullet points instead.
                 "structure_count": len(target.get("structures", [])),
                 "literature_count": len(target.get("literature", [])),
                 "best_inhibitor": None,
-                "best_structure": None
+                "best_structure": None,
+                "ic50_table": target.get("ic50_table", [])
             }
             
             # Find best inhibitor
@@ -164,6 +194,24 @@ DO NOT create ASCII tables - use clear prose and bullet points instead.
             summary_data["targets"].append(target_summary)
         
         return summary_data
+    
+    def _analyze_query_context(self, query: str, data: Dict[str, Any]) -> str:
+        """Let LLM analyze the query context naturally"""
+        # Simply provide the raw query and any applied filters
+        # Let the LLM understand the context using its intelligence
+        
+        context = f"User query: '{query}'\n"
+        
+        # Add filter information if present
+        if data.get("targets"):
+            first_target = data["targets"][0]
+            if "query_filters" in first_target:
+                filters = first_target["query_filters"]
+                if filters.get("min_ic50_nm") or filters.get("max_ic50_nm"):
+                    context += f"\nApplied IC50 filters: {filters}\n"
+                    context += "Note: The inhibitors shown are filtered based on these criteria."
+        
+        return context
     
     def _fallback_summarize(self, data: Dict[str, Any], query: str) -> str:
         """Fallback summary without LLM (still formatted nicely)"""

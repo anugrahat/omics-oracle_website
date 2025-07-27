@@ -39,7 +39,7 @@ class TherapeuticTargetAgent:
             "inhibitors": self.chembl_client.get_inhibitors_for_target(
                 gene_symbol, max_ic50_nm, min_ic50_nm
             ),
-            "structures": self.pdb_client.search_structures(gene_symbol)
+            "structures": self.pdb_client.search_structures(gene_symbol, limit=50)
         }
         
         print("📊 Gathering data from PubMed, ChEMBL, and PDB...")
@@ -47,7 +47,20 @@ class TherapeuticTargetAgent:
         for name, task in tasks.items():
             try:
                 results[name] = await task
-                print(f"✅ {name.title()}: {len(results[name])} results")
+                count = len(results[name])
+                
+                # Check if there are more results than shown
+                if name == "structures" and count > 0:
+                    # Check for total count metadata
+                    if "_total_count" in results[name][0] and results[name][0]["_total_count"] > count:
+                        print(f"✅ {name.title()}: {count}+ results (showing top {count})")
+                    else:
+                        print(f"✅ {name.title()}: {count} results")
+                elif name == "inhibitors" and count == 50:
+                    # ChEMBL often has more when we hit the limit
+                    print(f"✅ {name.title()}: {count}+ results")
+                else:
+                    print(f"✅ {name.title()}: {count} results")
             except Exception as e:
                 print(f"❌ {name.title()} error: {e}")
                 results[name] = []
@@ -67,7 +80,17 @@ class TherapeuticTargetAgent:
         target_score = self._calculate_target_score(results)
         
         # Generate summary
+        # Add filter info to results for summary generation
+        results["filter_info"] = {
+            "min_ic50_nm": min_ic50_nm,
+            "max_ic50_nm": max_ic50_nm
+        }
         summary = self._generate_target_summary(gene_symbol, results, target_score)
+        
+        # Generate IC50 table for top inhibitors
+        ic50_table = None
+        if results["inhibitors"]:
+            ic50_table = self._generate_ic50_table(results["inhibitors"][:10])
         
         return {
             "gene_symbol": gene_symbol,
@@ -77,6 +100,7 @@ class TherapeuticTargetAgent:
             "literature": results["literature"],
             "inhibitors": results["inhibitors"], 
             "structures": results["structures"],
+            "ic50_table": ic50_table,
             "query_filters": {
                 "min_ic50_nm": min_ic50_nm,
                 "max_ic50_nm": max_ic50_nm
@@ -216,22 +240,45 @@ class TherapeuticTargetAgent:
     def _generate_target_summary(self, gene_symbol: str, results: Dict[str, List], score: float) -> str:
         """Generate human-readable target summary"""
         
-        inhibitor_count = len(results.get("inhibitors", []))
+        inhibitors = results.get("inhibitors", [])
+        structures = results.get("structures", [])
+        
+        inhibitor_count = len(inhibitors)
         literature_count = len(results.get("literature", []))
-        structure_count = len(results.get("structures", []))
+        structure_count = len(structures)
+        
+        # Check if counts should show "+"
+        inhibitor_display = f"{inhibitor_count}+" if inhibitor_count == 50 else str(inhibitor_count)
+        structure_display = f"{structure_count}+" if (structure_count > 0 and structures[0].get("_total_count", 0) > structure_count) else str(structure_count)
         
         # Potency summary
         potency_summary = "No inhibitors found"
         if results.get("inhibitors"):
-            best_ic50 = min([inh.get("standard_value_nm", float('inf')) for inh in results["inhibitors"]])
-            potency_summary = f"Best inhibitor: {best_ic50:.2f} nM"
+            ic50_values = [inh.get("standard_value_nm", float('inf')) for inh in results["inhibitors"]]
+            best_ic50 = min(ic50_values)
+            
+            # Check if filters were applied
+            filter_info = results.get("filter_info", {})
+            min_ic50 = filter_info.get("min_ic50_nm")
+            max_ic50 = filter_info.get("max_ic50_nm")
+            
+            if min_ic50 or max_ic50:
+                filter_desc = []
+                if min_ic50:
+                    filter_desc.append(f">{min_ic50} nM")
+                if max_ic50:
+                    filter_desc.append(f"<{max_ic50} nM")
+                filter_str = " and ".join(filter_desc)
+                potency_summary = f"Best inhibitor in filtered set ({filter_str}): {best_ic50:.2f} nM"
+            else:
+                potency_summary = f"Best inhibitor: {best_ic50:.2f} nM"
         
         # Structure quality summary
         structure_summary = "No structures available"
         if results.get("structures"):
             high_quality = [s for s in results["structures"] if s.get("quality_score", 0) >= 0.7]
             ligand_bound = [s for s in results["structures"] if s.get("ligands")]
-            structure_summary = f"{structure_count} structures ({len(high_quality)} high-quality, {len(ligand_bound)} ligand-bound)"
+            structure_summary = f"{structure_display} structures ({len(high_quality)} high-quality, {len(ligand_bound)} ligand-bound)"
         
         # Overall assessment
         if score >= 8.0:
@@ -251,7 +298,7 @@ Assessment: {assessment}
 
 📊 Data Summary:
 • Literature: {literature_count} papers
-• Inhibitors: {inhibitor_count} compounds
+• Inhibitors: {inhibitor_display} compounds
 • {potency_summary}
 • Structures: {structure_summary}
         """.strip()
@@ -282,7 +329,40 @@ Analyzed {total_targets} targets (Average score: {avg_score:.1f}/10.0)
 • Challenging targets ({len(challenging)}): {', '.join([t['gene_symbol'] for t in challenging])}
         """.strip()
         
-        return summary
+        return summary.strip()
+    
+    def _generate_ic50_table(self, inhibitors: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Generate a structured IC50 table for top inhibitors"""
+        ic50_table = []
+        
+        for inhibitor in inhibitors:
+            row = {
+                "chembl_id": inhibitor.get("molecule_chembl_id", inhibitor.get("chembl_id", "Unknown")),
+                "ic50_nm": inhibitor.get("standard_value_nm"),
+                "ic50_display": self._format_ic50(inhibitor.get("standard_value_nm")),
+                "assay_type": inhibitor.get("assay_type", "Unknown"),
+                "assay_description": inhibitor.get("assay_description", "No description")[:100],  # Truncate long descriptions
+                "quality_score": inhibitor.get("quality_score", 0),
+                "max_phase": inhibitor.get("max_phase", "Preclinical"),
+                "smiles": inhibitor.get("smiles", "")
+            }
+            ic50_table.append(row)
+        
+        return ic50_table
+    
+    def _format_ic50(self, ic50_nm: Optional[float]) -> str:
+        """Format IC50 value for display"""
+        if ic50_nm is None:
+            return "N/A"
+        
+        if ic50_nm < 1:
+            return f"{ic50_nm:.2f} nM"
+        elif ic50_nm < 1000:
+            return f"{ic50_nm:.1f} nM"
+        elif ic50_nm < 1_000_000:
+            return f"{ic50_nm/1000:.1f} μM"
+        else:
+            return f"{ic50_nm/1_000_000:.1f} mM"
     
     async def save_results(self, results: Dict[str, Any], output_file: Path):
         """Save analysis results to JSON file"""

@@ -58,26 +58,27 @@ class QueryParser:
         """Parse query using OpenAI LLM"""
         
         prompt = f"""
-You are an expert in parsing therapeutic target discovery queries. Parse the following query and extract key information:
+Parse this therapeutic target discovery query and extract key information:
 
 Query: "{query}"
 
-Please extract and return a JSON object with:
-1. gene_symbols: List of gene/protein symbols (e.g., ["EGFR", "JAK2"])
-2. min_ic50_nm: Minimum IC50 value in nM (null if not specified)
-3. max_ic50_nm: Maximum IC50 value in nM (null if not specified)  
-4. disease_context: Disease mentioned (null if not specified)
-5. query_type: "single_target", "multi_target", or "disease"
-6. is_disease_query: true if this is a disease-focused query, false if protein-focused
-7. confidence: Your confidence in the parsing (0.0-1.0)
+Return a JSON object with:
+- gene_symbols: List of gene/protein symbols
+- min_ic50_nm: Minimum IC50 in nM (if mentioned)
+- max_ic50_nm: Maximum IC50 in nM (if mentioned)
+- disease_context: Disease name (if mentioned)
+- query_type: "single_target", "multi_target", or "disease"
+- is_disease_query: true if disease-focused, false if protein-focused
+- confidence: Your confidence (0.0-1.0)
 
-Examples:
-- "EGFR inhibitors under 50 nM" → gene_symbols: ["EGFR"], max_ic50_nm: 50
-- "JAK2, BRAF between 1 and 100 nM" → gene_symbols: ["JAK2", "BRAF"], min_ic50_nm: 1, max_ic50_nm: 100  
-- "Alzheimer's disease targets" → disease_context: "Alzheimer's disease", is_disease_query: true
-- "potent CDK9 inhibitors" → gene_symbols: ["CDK9"] (interpret "potent" as <10 nM)
+Notes:
+- Convert all units to nM (1 μM = 1000 nM)
+- "above X" means min_ic50_nm = X
+- "below/under X" means max_ic50_nm = X
+- "potent" typically means <10 nM
+- "weak" typically means >10000 nM
 
-Return only valid JSON format:
+Return only valid JSON.
 """
 
         try:

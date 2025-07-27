@@ -73,10 +73,29 @@ class DiseaseTargetMapper:
         if clinical_filter:
             clinical_instruction = f"Focus on targets that are in {clinical_filter} stage."
         
+        # Check if the query contains filtering criteria
+        potency_filter = ""
+        if "above" in disease.lower() and ("nm" in disease.lower() or "micromolar" in disease.lower() or "μm" in disease.lower()):
+            potency_filter = """
+
+IMPORTANT: The user is specifically asking about inhibitors with certain potency ranges. 
+However, as a target discovery system, you should still return the BEST therapeutic targets for the disease.
+The potency filtering will be applied later when searching for specific inhibitors.
+Do NOT limit your target selection based on inhibitor potency - focus on biological relevance."""
+        
+        # Extract the actual disease name (remove filtering criteria)
+        disease_clean = disease
+        for phrase in ["inhibitors above", "inhibitors below", "compounds above", "compounds below"]:
+            if phrase in disease.lower():
+                disease_clean = disease.lower().split(phrase)[0].strip()
+                break
+        
         return f"""
 You are a therapeutic target discovery expert. Given a disease, identify the most promising protein targets for drug development.
 
-Disease: {disease}
+Disease/Query: {disease}
+Core Disease: {disease_clean}
+{potency_filter}
 
 Please identify the top {max_targets} therapeutic targets and return them in JSON format:
 
@@ -85,7 +104,7 @@ Please identify the top {max_targets} therapeutic targets and return them in JSO
     {{
       "gene_symbol": "GENE_NAME",
       "protein_name": "Full protein name",
-      "rationale": "Brief explanation of why this target is relevant for {disease}",
+      "rationale": "Brief explanation of why this target is relevant for {disease_clean}",
       "confidence": 0.9,
       "clinical_stage": "approved|clinical|preclinical|research",
       "pathway": "Main biological pathway involved"

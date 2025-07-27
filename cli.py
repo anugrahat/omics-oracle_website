@@ -195,6 +195,24 @@ Examples:
                     ic50 = inh.get("standard_value_nm", "N/A")
                     quality = inh.get("quality_score", 0)
                     print(f"{i}. {name} - IC50: {ic50} nM (Quality: {quality:.2f})")
+            
+            # Display IC50 table if available
+            ic50_table = results.get("ic50_table")
+            if ic50_table:
+                print(f"\n📊 IC50 TABLE (Top {len(ic50_table)} compounds):")
+                print("-" * 100)
+                print(f"{'ChEMBL ID':<15} {'IC50':<12} {'Assay Type':<15} {'Phase':<12} {'Quality':<8} {'Description':<40}")
+                print("-" * 100)
+                
+                for row in ic50_table:
+                    chembl_id = row['chembl_id'][:14]
+                    ic50_display = row['ic50_display'][:11]
+                    assay_type = row['assay_type'][:14]
+                    max_phase = str(row.get('max_phase', 'Pre'))[:11]
+                    quality = f"{row['quality_score']:.2f}"
+                    description = row['assay_description'][:39]
+                    
+                    print(f"{chembl_id:<15} {ic50_display:<12} {assay_type:<15} {max_phase:<12} {quality:<8} {description:<40}")
         
         # Save results
         output_file = args.output
