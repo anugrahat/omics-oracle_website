@@ -73,10 +73,11 @@ Return a JSON object with:
 
 Notes:
 - Convert all units to nM (1 μM = 1000 nM)
-- "above X" means min_ic50_nm = X
-- "below/under X" means max_ic50_nm = X
-- "potent" typically means <10 nM
-- "weak" typically means >10000 nM
+- Understand the query intent: researchers might want potent OR weak inhibitors
+- "IC50 above X" means min_ic50_nm = X (weaker compounds)
+- "IC50 below X" means max_ic50_nm = X (more potent compounds)
+- Use your understanding of drug discovery context to interpret ambiguous queries
+- Consider: Why would someone want compounds with specific potency ranges?
 
 Return only valid JSON.
 """

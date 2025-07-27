@@ -437,44 +437,53 @@ if run_analysis:
                 )
                 
                 # Top inhibitors
-                st.subheader("💊 Top Inhibitors")
+                st.subheader("💊 Top Inhibitors (Filtered)")
                 
-                all_inhibitors = []
-                for target in targets:
-                    for inhibitor in target.get("inhibitors", []):
-                        if inhibitor.get("standard_value_nm"):
-                            ic50_val = inhibitor.get("standard_value_nm")
-                            # Format IC50 with appropriate precision
-                            if ic50_val < 1:
-                                ic50_display = f"{ic50_val:.3f} nM"
-                            elif ic50_val < 10:
-                                ic50_display = f"{ic50_val:.2f} nM"
-                            else:
-                                ic50_display = f"{ic50_val:.1f} nM"
-                            
+                # Check if we have IC50 table data (single target) or need to aggregate (multi-target)
+                if "ic50_table" in results:
+                    # Single target - use the IC50 table which respects filters
+                    ic50_data = results["ic50_table"]
+                    if ic50_data:
+                        all_inhibitors = []
+                        for i, row in enumerate(ic50_data[:10]):
                             all_inhibitors.append({
-                                "Rank": "🥇",  # Will be updated below
-                                "ChEMBL ID": inhibitor.get("molecule_chembl_id", "Unknown"),
-                                "Target": target.get("gene_symbol", "Unknown"),
-                                "IC50": ic50_display
+                                "Rank": "🥇" if i == 0 else "🥈" if i == 1 else "🥉" if i == 2 else f"{i+1}⃣",
+                                "ChEMBL ID": row["chembl_id"],
+                                "Target": results.get("gene_symbol", "Unknown"),
+                                "IC50": row["ic50_display"],
+                                "Assay Type": row["assay_type"],
+                                "Phase": row["clinical_phase"] or "Preclinical"
                             })
+                        inhibitor_df = pd.DataFrame(all_inhibitors)
+                    else:
+                        st.info("No inhibitors found matching the specified criteria.")
+                        inhibitor_df = None
+                else:
+                    # Multi-target - aggregate IC50 tables from each target
+                    all_inhibitors = []
+                    for target in targets:
+                        if "ic50_table" in target and target["ic50_table"]:
+                            for row in target["ic50_table"][:5]:  # Top 5 per target
+                                all_inhibitors.append({
+                                    "ChEMBL ID": row["chembl_id"],
+                                    "Target": target.get("gene_symbol", "Unknown"),
+                                    "IC50": row["ic50_display"],
+                                    "Assay Type": row["assay_type"],
+                                    "Phase": row["clinical_phase"] or "Preclinical"
+                                })
+                    
+                    if all_inhibitors:
+                        # Sort by IC50 value for ranking
+                        all_inhibitors.sort(key=lambda x: x.get("ic50_value", float('inf')))
+                        # Add ranking
+                        for i, inhibitor in enumerate(all_inhibitors[:10]):
+                            inhibitor["Rank"] = "🥇" if i == 0 else "🥈" if i == 1 else "🥉" if i == 2 else f"{i+1}⃣"
+                        inhibitor_df = pd.DataFrame(all_inhibitors[:10])
+                    else:
+                        st.info("No inhibitors found matching the specified criteria.")
+                        inhibitor_df = None
                 
-                if all_inhibitors:
-                    # Sort by IC50 (potency)
-                    all_inhibitors.sort(key=lambda x: float(x["IC50"].split()[0]) if x["IC50"] != "N/A" else float('inf'))
-                    
-                    # Add ranking emojis
-                    for i, inhibitor in enumerate(all_inhibitors[:10]):
-                        if i == 0:
-                            inhibitor["Rank"] = "🥇"  # Gold medal
-                        elif i == 1:
-                            inhibitor["Rank"] = "🥈"  # Silver medal
-                        elif i == 2:
-                            inhibitor["Rank"] = "🥉"  # Bronze medal
-                        else:
-                            inhibitor["Rank"] = f"{i+1}⃣"  # Number emojis
-                    
-                    inhibitor_df = pd.DataFrame(all_inhibitors[:10])  # Top 10
+                if inhibitor_df is not None:
                     st.dataframe(
                         inhibitor_df, 
                         use_container_width=True,
@@ -482,11 +491,11 @@ if run_analysis:
                             "Rank": st.column_config.TextColumn("🏆", width="small"),
                             "ChEMBL ID": st.column_config.TextColumn("🔬 ChEMBL ID", width="large"),
                             "Target": st.column_config.TextColumn("🎯 Target", width="medium"),
-                            "IC50": st.column_config.TextColumn("💊 IC50", width="medium")
+                            "IC50": st.column_config.TextColumn("💊 IC50", width="medium"),
+                            "Assay Type": st.column_config.TextColumn("🧪 Type", width="small"),
+                            "Phase": st.column_config.TextColumn("🏥 Phase", width="medium")
                         }
                     )
-                else:
-                    st.info("🔍 No inhibitor data found for these targets.")
                 
                 # Generate AI summary with progress tracking
                 st.subheader("🎯 Target Identification Overview")
