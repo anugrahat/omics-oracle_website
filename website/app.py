@@ -203,6 +203,16 @@ with col1:
     
     # Run button
     run_analysis = st.button("🚀 Run Analysis", type="primary", use_container_width=True)
+    
+    # Clear previous results when starting new analysis
+    if run_analysis:
+        # Clear previous results to avoid confusion
+        if 'current_query' in st.session_state:
+            del st.session_state['current_query']
+        if 'analysis_results' in st.session_state:
+            del st.session_state['analysis_results']
+        # Set new query
+        st.session_state.current_query = query.strip()
 
 with col2:
     st.title("🏆 Features Demo")
@@ -247,6 +257,11 @@ if run_analysis:
     
     if not query.strip():
         st.error("⚠️ Please enter a query to analyze.")
+        st.stop()
+    
+    # Ensure we're processing the current query (prevent confusion from multiple submissions)
+    if hasattr(st.session_state, 'current_query') and st.session_state.current_query != query.strip():
+        st.warning("⚠️ Query changed during analysis. Please click 'Run Analysis' again for the new query.")
         st.stop()
     
     # Track query start
