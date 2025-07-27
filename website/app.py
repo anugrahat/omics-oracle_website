@@ -619,6 +619,6 @@ st.markdown("""
     <p>🧬 <strong>Omics Oracle</strong> - Built with ❤️ for the drug discovery community</p>
     <p>⚡ Powered by OpenAI GPT-4 | 📀 Real-time data from PubMed, ChEMBL, RCSB PDB</p>
     <p>🔒 Your API keys are secure and never stored on our servers</p>
-    <p>💻 <strong>Open Source:</strong> <a href="https://github.com/anugrahat/omics-oracle-" target="_blank" style="color: #0066cc; text-decoration: none;">⭐ View Code on GitHub</a> | 👤 Developed by <strong>Anugraha T</strong></p>
+    <p>💻 <strong>Open Source:</strong> <a href="https://github.com/anugrahat/omics-oracle_website" target="_blank" style="color: #0066cc; text-decoration: none;">⭐ View Code on GitHub</a> | 👤 Developed by <strong>Anugraha T</strong></p>
 </div>
 """, unsafe_allow_html=True)
