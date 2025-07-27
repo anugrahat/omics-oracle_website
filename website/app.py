@@ -466,7 +466,7 @@ if run_analysis:
                     st.info("🔍 No inhibitor data found for these targets.")
                 
                 # Generate AI summary with progress tracking
-                st.subheader("📋 Clinical Summary")
+                st.subheader("🎯 Target Identification Overview")
                 
                 # AI Summary progress indicator
                 ai_progress = st.progress(0)
