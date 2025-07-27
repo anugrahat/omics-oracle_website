@@ -258,6 +258,9 @@ if run_analysis:
         """)
         st.stop()
     
+    # Debug: Show what query we received
+    st.write(f"DEBUG: Query received: '{query}' (length: {len(query)})")
+    
     if not query.strip():
         st.error("⚠️ Please enter a query to analyze.")
         st.stop()
