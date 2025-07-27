@@ -70,7 +70,7 @@ ANALYSIS DATA:
 
 Provide a comprehensive clinical analysis in markdown format with these sections:
 
-## 🎯 Executive Summary
+## Executive Summary
 Provide 2-3 sentences highlighting the most significant findings and therapeutic opportunities.
 
 ## 🧬 Target Analysis & Druggability Assessment
