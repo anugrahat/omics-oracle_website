@@ -1,6 +1,7 @@
-# 🧬 Omics Oracle: Therapeutic Target Discovery Agent
+# Omics-Oracle — a Retrieval-Augmented GenAI agent that instantly surfaces druggable targets by mining PubMed, ChEMBL, and PDB in one shot.
 
 **AI-powered drug discovery platform** that integrates multiple biological databases with Large Language Model intelligence for natural language therapeutic target analysis.
+
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.8+-brightgreen.svg)
@@ -14,7 +15,6 @@
 - ⚡ **Async Performance**: Concurrent API calls with intelligent SQLite caching
 - 🏆 **Comprehensive Scoring**: Literature evidence + inhibitor potency + structural data (0-10 scale)
 - 🛡️ **Production Ready**: Rate limiting, fallback mechanisms, graceful error handling
-- 🔄 **Works Without API Keys**: Fallback systems ensure functionality
 - 📋 **Intelligent Summaries**: LLM-generated analysis with clinical insights
 
 ## 🚀 Quick Start
@@ -74,7 +74,7 @@ NCBI_API_KEY=your_ncbi_key_here  # Optional for higher PubMed rate limits
 - 📋 **Beautiful Summaries**: Clinical insights, target recommendations, publication-ready output
 - 🔬 **Advanced Analysis**: Confidence scoring, query type detection
 
-**✅ No API Keys? Still Works!**
+**✅ No API Keys? Still Works!** Limited
 - Without OpenAI: Falls back to regex parsing + curated disease mappings
 - Without NCBI: Uses Europe PMC for literature search
 - Full functionality maintained with graceful degradation!
@@ -469,7 +469,7 @@ If you use Omics Oracle in your research, please cite:
 
 ---
 
-**Built with ❤️ for the drug discovery community**
+**Built for the drug discovery community**
 
 *Advancing precision medicine through intelligent target discovery*
 
