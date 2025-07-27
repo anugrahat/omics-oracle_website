@@ -19,6 +19,7 @@
 
 ## 🚀 Quick Start
 
+### 💻 CLI Version (Core Tool)
 ```bash
 # Clone and setup
 git clone https://github.com/anugrahat/omics-oracle-.git
@@ -29,6 +30,18 @@ pip install -r requirements.txt
 # Run immediately (no API keys required!)
 python cli.py "type 2 diabetes therapeutic targets"
 ```
+
+### 🌐 Web Interface (For Recruiters/Demos)
+```bash
+# Additional setup for beautiful web interface
+pip install -r website/requirements.txt
+
+# Launch Streamlit demo
+cd website && streamlit run app.py
+# Opens at http://localhost:8501
+```
+
+**🎯 For Hiring Managers:** See `website/README.md` for deployment guide
 
 ## 🔧 Configuration (Optional but Recommended)
 
@@ -302,18 +315,22 @@ no inhibitors, should not be overlooked due to its genetic significance.
 ## 🏗️ Architecture
 
 ```
-thera_agent/
-├── agent.py              # Main orchestrator
-├── cli.py                # Command-line interface  
-├── query_parser.py       # LLM query understanding
-├── disease_mapper.py     # Disease→target mapping
-├── result_summarizer.py  # Intelligent LLM summaries
-└── data/
-    ├── cache.py          # SQLite caching (6-48h TTL)
-    ├── http_client.py    # Rate-limited async HTTP
-    ├── pubmed_client.py  # Literature (PubMed + Europe PMC)
-    ├── chembl_client.py  # Bioactivity data
-    └── pdb_client.py     # Protein structures
+├── cli.py                # 💻 Command-line interface
+├── thera_agent/          # 🧬 Core RAG system
+│   ├── agent.py          # Main orchestrator
+│   ├── query_parser.py   # LLM query understanding
+│   ├── disease_mapper.py # Disease→target mapping
+│   ├── result_summarizer.py # Intelligent summaries
+│   └── data/
+│       ├── cache.py      # SQLite caching
+│       ├── http_client.py # Async HTTP client
+│       ├── pubmed_client.py # Literature search
+│       ├── chembl_client.py # Bioactivity data
+│       └── pdb_client.py # Protein structures
+└── website/              # 🌐 Web demo for recruiters
+    ├── app.py            # Streamlit interface
+    ├── requirements.txt  # Web dependencies
+    └── README.md         # Deployment guide
 ```
 
 ## 🛡️ Robust Fallback Systems

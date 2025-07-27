@@ -60,37 +60,48 @@ class TherapeuticResultSummarizer:
         summary_data = self._prepare_data_for_llm(data)
         
         prompt = f"""
-You are a world-class therapeutic target discovery expert and scientific communicator. 
-Analyze the attached drug discovery results and create a beautiful, comprehensive summary.
+You are a world-class pharmaceutical researcher and drug discovery expert writing for a professional audience.
+Analyze the therapeutic target discovery results and provide an intelligent clinical analysis.
 
 ORIGINAL QUERY: "{query}"
 
 ANALYSIS DATA:
 {json.dumps(summary_data, indent=2)}
 
-Please create a comprehensive, beautifully formatted summary including:
+Provide a comprehensive clinical analysis in markdown format with these sections:
 
-1. **EXECUTIVE SUMMARY** (2-3 sentences highlighting key findings)
+## 🎯 Executive Summary
+Provide 2-3 sentences highlighting the most significant findings and therapeutic opportunities.
 
-2. **TARGET RANKING TABLE** (use proper spacing for terminal display):
-   Create a formatted table showing: Target | Score | Inhibitors | Structures | Clinical Status
+## 🧬 Target Analysis & Druggability Assessment
+For each target, analyze:
+- **Biological relevance** to the disease/indication
+- **Druggability factors** (structure availability, binding sites, etc.)
+- **Therapeutic potential** and development opportunities
+- **Existing clinical precedent** or competitive landscape
 
-3. **KEY INSIGHTS** (3-5 bullet points with clinical significance):
-   - Focus on druggability, clinical relevance, and therapeutic potential
-   - Highlight any FDA-approved drugs or clinical trials
-   - Note structural advantages or challenges
+## 💊 Lead Compound Assessment
+Analyze the most promising inhibitors focusing on:
+- **Potency analysis** (IC50 values and significance)
+- **Selectivity considerations** 
+- **Drug-like properties** and development potential
+- **Structure-activity relationships** where relevant
 
-4. **INHIBITOR HIGHLIGHTS** (top 3 most potent compounds):
-   Show ChEMBL ID, IC50 value, and brief significance
+## 🏥 Clinical Development Perspective
+Provide strategic insights on:
+- **Priority targets** for further investigation
+- **Development timelines** and regulatory considerations  
+- **Market opportunities** and competitive landscape
+- **Key risks** and mitigation strategies
 
-5. **STRUCTURAL ANALYSIS**:
-   Highlight best structures, resolution quality, and drug design utility
+## 🔬 Research Recommendations
+Suggest specific next steps:
+- **Optimization strategies** for lead compounds
+- **Additional studies** needed (PK/PD, toxicity, etc.)
+- **Partnership opportunities** or licensing considerations
 
-6. **CLINICAL RECOMMENDATIONS**:
-   Which targets deserve further investigation and why
-
-Format for terminal display with emojis, clear headers, and professional scientific language.
-Make it publication-ready but accessible.
+Write in professional pharmaceutical industry language, focus on actionable insights, and provide specific recommendations.
+DO NOT create ASCII tables - use clear prose and bullet points instead.
 """
 
         try:
