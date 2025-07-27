@@ -188,20 +188,22 @@ with col1:
     st.title("🎯 Drug Target Discovery Query")
     
     # Query input - preserve user's query during analysis
-    if 'selected_query' in st.session_state:
-        # User clicked an example query from sidebar
-        default_query = st.session_state.selected_query
+    # Initialize query_input in session state if not present
+    if 'query_input' not in st.session_state:
+        if 'selected_query' in st.session_state:
+            # User clicked an example query from sidebar
+            st.session_state.query_input = st.session_state.selected_query
+            del st.session_state.selected_query
+        else:
+            # Show example for new users
+            st.session_state.query_input = "Find druggable candidates for Alzheimer's disease"
+    elif 'selected_query' in st.session_state:
+        # Update with new example query
+        st.session_state.query_input = st.session_state.selected_query
         del st.session_state.selected_query
-    elif 'active_query' in st.session_state and st.session_state.active_query:
-        # Preserve the query during analysis
-        default_query = st.session_state.active_query
-    else:
-        # Show example for new users
-        default_query = "Find druggable candidates for Alzheimer's disease"
     
     query = st.text_area(
         "Enter your therapeutic target query:",
-        value=default_query,
         height=100,
         help="💡 Click examples in sidebar or try: 'COPD inhibitors', 'Parkinson targets', 'EGFR under 50 nM'",
         key="query_input"
@@ -219,7 +221,6 @@ with col1:
             del st.session_state['analysis_results']
         # Set new query
         st.session_state.current_query = query.strip()
-        st.session_state.active_query = query.strip()  # Preserve query in text area
 
 with col2:
     st.title("🏆 Features Demo")
