@@ -187,14 +187,13 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.title("🎯 Drug Target Discovery Query")
     
-    # Query input - only show placeholder for first-time users
+    # Query input with useful defaults
     if 'selected_query' in st.session_state:
         default_query = st.session_state.selected_query
         del st.session_state.selected_query
-    elif st.session_state.query_count == 0:
-        default_query = "Find druggable candidates for Alzheimer's disease"
     else:
-        default_query = ""
+        # Always show a helpful example query
+        default_query = "Find druggable candidates for Alzheimer's disease"
     
     query = st.text_area(
         "Enter your therapeutic target query:",
@@ -257,9 +256,6 @@ if run_analysis:
         👆 **Enter your API key in the sidebar to continue!**
         """)
         st.stop()
-    
-    # Debug: Show what query we received
-    st.write(f"DEBUG: Query received: '{query}' (length: {len(query)})")
     
     if not query.strip():
         st.error("⚠️ Please enter a query to analyze.")
