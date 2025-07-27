@@ -71,8 +71,8 @@ st.markdown("""
 # Main header
 st.markdown("""
 <div class="main-header">
-    <h1>🧬 Omics Oracle: AI-Powered Therapeutic Target Discovery</h1>
-    <p>Professional drug discovery platform for pharmaceutical companies and biotech startups</p>
+    <h1>🧬 Omics Oracle: RAG Agent for Drug Discovery</h1>
+    <p>Real-time retrieval from PubMed, ChEMBL & PDB databases with AI-powered analysis</p>
 </div>
 """, unsafe_allow_html=True)
 
