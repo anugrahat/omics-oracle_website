@@ -439,6 +439,21 @@ if run_analysis:
                 # Top inhibitors
                 st.subheader("💊 Top Inhibitors (Filtered)")
                 
+                # DEBUG: Show what we're getting
+                with st.expander("Debug: Raw Results Structure"):
+                    st.write("Results keys:", list(results.keys()))
+                    if "ic50_table" in results:
+                        st.write("IC50 table found, length:", len(results.get("ic50_table", [])))
+                        if results.get("ic50_table"):
+                            st.write("First entry:", results["ic50_table"][0])
+                    elif "targets" in results:
+                        st.write("Multi-target results found")
+                        for i, target in enumerate(results["targets"][:2]):
+                            st.write(f"Target {i}:", target.get("gene_symbol"))
+                            st.write(f"Has ic50_table:", "ic50_table" in target)
+                            if "ic50_table" in target:
+                                st.write(f"IC50 table length:", len(target.get("ic50_table", [])))
+                
                 # Check if we have IC50 table data (single target) or need to aggregate (multi-target)
                 if "ic50_table" in results:
                     # Single target - use the IC50 table which respects filters
