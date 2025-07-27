@@ -19,7 +19,19 @@ from thera_agent.agent import TherapeuticTargetAgent
 from thera_agent.query_parser import QueryParser
 from thera_agent.disease_mapper import DiseaseTargetMapper
 from thera_agent.result_summarizer import result_summarizer
-from analytics import UsageTracker
+
+# Try to import analytics, but don't fail if it's not available
+try:
+    from analytics import UsageTracker
+except ImportError:
+    # Fallback analytics class for deployment
+    class UsageTracker:
+        def __init__(self):
+            pass
+        def track_query(self, *args, **kwargs):
+            pass
+        def get_stats(self):
+            return {"total_queries": 0, "unique_users": 0}
 import time
 import uuid
 
