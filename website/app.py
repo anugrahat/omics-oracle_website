@@ -187,18 +187,21 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.title("🎯 Drug Target Discovery Query")
     
-    # Query input
+    # Query input - only show placeholder for first-time users
     if 'selected_query' in st.session_state:
         default_query = st.session_state.selected_query
         del st.session_state.selected_query
-    else:
+    elif st.session_state.query_count == 0:
         default_query = "Find druggable candidates for Alzheimer's disease"
+    else:
+        default_query = ""
     
     query = st.text_area(
         "Enter your therapeutic target query:",
         value=default_query,
         height=100,
-        help="💡 Click examples in sidebar or try: 'COPD inhibitors', 'Parkinson targets', 'EGFR under 50 nM'"
+        help="💡 Click examples in sidebar or try: 'COPD inhibitors', 'Parkinson targets', 'EGFR under 50 nM'",
+        key="query_input"
     )
     
     # Run button
