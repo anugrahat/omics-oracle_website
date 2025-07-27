@@ -468,17 +468,20 @@ if run_analysis:
                                     "ChEMBL ID": row["chembl_id"],
                                     "Target": target.get("gene_symbol", "Unknown"),
                                     "IC50": row["ic50_display"],
+                                    "ic50_nm": row.get("ic50_nm", float('inf')),  # Add numeric value for sorting
                                     "Assay Type": row["assay_type"],
                                     "Phase": row.get("max_phase") or "Preclinical"
                                 })
                     
                     if all_inhibitors:
                         # Sort by IC50 value for ranking
-                        all_inhibitors.sort(key=lambda x: x.get("ic50_value", float('inf')))
+                        all_inhibitors.sort(key=lambda x: x.get("ic50_nm", float('inf')))
                         # Add ranking
                         for i, inhibitor in enumerate(all_inhibitors[:10]):
                             inhibitor["Rank"] = "🥇" if i == 0 else "🥈" if i == 1 else "🥉" if i == 2 else f"{i+1}⃣"
-                        inhibitor_df = pd.DataFrame(all_inhibitors[:10])
+                        # Create dataframe without internal sorting field
+                        display_inhibitors = [{k: v for k, v in inh.items() if k != 'ic50_nm'} for inh in all_inhibitors[:10]]
+                        inhibitor_df = pd.DataFrame(display_inhibitors)
                     else:
                         st.info("No inhibitors found matching the specified criteria.")
                         inhibitor_df = None

@@ -117,18 +117,19 @@ Suggest specific next steps:
 - **Partnership opportunities** or licensing considerations
 
 Write in professional pharmaceutical industry language, focus on actionable insights, and provide specific recommendations.
-DO NOT create ASCII tables - use clear prose and bullet points instead.
+DO NOT create ASCII tables or TOP INHIBITORS sections - use clear prose and bullet points instead.
+Focus on the clinical analysis and drug discovery insights, not raw data listings.
 """
 
         try:
             response = await openai.ChatCompletion.acreate(
-                model="gpt-4",
+                model="gpt-4-turbo-preview",
                 messages=[
                     {"role": "system", "content": "You are a therapeutic target discovery expert and scientific writer. Create beautiful, comprehensive summaries with proper formatting for terminal display."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.3,
-                max_tokens=2000
+                max_tokens=3000
             )
             
             return response.choices[0].message.content.strip()
@@ -247,15 +248,8 @@ DO NOT create ASCII tables - use clear prose and bullet points instead.
             
             table_data.append([symbol, f"{score:.1f}", inhibitors, structures, status])
         
-        summary.append("📊 TARGET RANKING:")
-        summary.append("")
-        summary.append(tabulate(
-            table_data,
-            headers=["Target", "Score", "Inhibitors", "Structures", "Assessment"],
-            tablefmt="grid",
-            stralign="center"
-        ))
-        summary.append("")
+        # TARGET RANKING table removed per user request
+        # Summary focuses on key insights instead
         
         # Top inhibitors
         all_inhibitors = []
