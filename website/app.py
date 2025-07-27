@@ -187,12 +187,16 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.title("🎯 Drug Target Discovery Query")
     
-    # Query input with useful defaults
+    # Query input - preserve user's query during analysis
     if 'selected_query' in st.session_state:
+        # User clicked an example query from sidebar
         default_query = st.session_state.selected_query
         del st.session_state.selected_query
+    elif 'active_query' in st.session_state and st.session_state.active_query:
+        # Preserve the query during analysis
+        default_query = st.session_state.active_query
     else:
-        # Always show a helpful example query
+        # Show example for new users
         default_query = "Find druggable candidates for Alzheimer's disease"
     
     query = st.text_area(
@@ -215,6 +219,7 @@ with col1:
             del st.session_state['analysis_results']
         # Set new query
         st.session_state.current_query = query.strip()
+        st.session_state.active_query = query.strip()  # Preserve query in text area
 
 with col2:
     st.title("🏆 Features Demo")
