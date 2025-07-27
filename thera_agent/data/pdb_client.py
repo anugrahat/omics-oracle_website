@@ -15,14 +15,12 @@ class PDBClient:
         """Search for PDB structures with quality assessment"""
         client = await get_http_client()
         
-        # Build proper v2 API text search query
+        # Build proper v2 API full-text search query
         query = {
             "query": {
                 "type": "terminal",
-                "service": "text",
+                "service": "full_text",
                 "parameters": {
-                    "attribute": "struct.title",
-                    "operator": "contains_phrase",
                     "value": gene_symbol.upper()
                 }
             },
@@ -78,14 +76,12 @@ class PDBClient:
             # Use the RCSB REST API search endpoint
             search_url = "https://search.rcsb.org/rcsbsearch/v2/query"
             
-            # Proper v2 API text search query
+            # Proper v2 API full-text search query
             query = {
                 "query": {
                     "type": "terminal",
-                    "service": "text",
+                    "service": "full_text",
                     "parameters": {
-                        "attribute": "struct.title",
-                        "operator": "contains_phrase",
                         "value": gene_symbol.upper()
                     }
                 },
