@@ -439,21 +439,6 @@ if run_analysis:
                 # Top inhibitors
                 st.subheader("💊 Top Inhibitors (Filtered)")
                 
-                # DEBUG: Show what we're getting
-                with st.expander("Debug: Raw Results Structure"):
-                    st.write("Results keys:", list(results.keys()))
-                    if "ic50_table" in results:
-                        st.write("IC50 table found, length:", len(results.get("ic50_table", [])))
-                        if results.get("ic50_table"):
-                            st.write("First entry:", results["ic50_table"][0])
-                    elif "targets" in results:
-                        st.write("Multi-target results found")
-                        for i, target in enumerate(results["targets"][:2]):
-                            st.write(f"Target {i}:", target.get("gene_symbol"))
-                            st.write(f"Has ic50_table:", "ic50_table" in target)
-                            if "ic50_table" in target:
-                                st.write(f"IC50 table length:", len(target.get("ic50_table", [])))
-                
                 # Check if we have IC50 table data (single target) or need to aggregate (multi-target)
                 if "ic50_table" in results:
                     # Single target - use the IC50 table which respects filters
@@ -467,7 +452,7 @@ if run_analysis:
                                 "Target": results.get("gene_symbol", "Unknown"),
                                 "IC50": row["ic50_display"],
                                 "Assay Type": row["assay_type"],
-                                "Phase": row["clinical_phase"] or "Preclinical"
+                                "Phase": row.get("max_phase", "Preclinical")
                             })
                         inhibitor_df = pd.DataFrame(all_inhibitors)
                     else:
@@ -484,7 +469,7 @@ if run_analysis:
                                     "Target": target.get("gene_symbol", "Unknown"),
                                     "IC50": row["ic50_display"],
                                     "Assay Type": row["assay_type"],
-                                    "Phase": row["clinical_phase"] or "Preclinical"
+                                    "Phase": row.get("max_phase") or "Preclinical"
                                 })
                     
                     if all_inhibitors:
@@ -499,18 +484,8 @@ if run_analysis:
                         inhibitor_df = None
                 
                 if inhibitor_df is not None:
-                    st.dataframe(
-                        inhibitor_df, 
-                        use_container_width=True,
-                        column_config={
-                            "Rank": st.column_config.TextColumn("🏆", width="small"),
-                            "ChEMBL ID": st.column_config.TextColumn("🔬 ChEMBL ID", width="large"),
-                            "Target": st.column_config.TextColumn("🎯 Target", width="medium"),
-                            "IC50": st.column_config.TextColumn("💊 IC50", width="medium"),
-                            "Assay Type": st.column_config.TextColumn("🧪 Type", width="small"),
-                            "Phase": st.column_config.TextColumn("🏥 Phase", width="medium")
-                        }
-                    )
+                    # Display the dataframe
+                    st.dataframe(inhibitor_df, use_container_width=True)
                 
                 # Generate AI summary with progress tracking
                 st.subheader("🎯 Target Identification Overview")
